@@ -269,20 +269,20 @@ def login():
         cursor = conn.cursor()
 
         # Check if the email exists in the database
-        query = "SELECT id, password FROM users WHERE email = %s"
+        query = "SELECT id, password,email_confirmed FROM users WHERE email = %s"
         cursor.execute(query, (email,))
         user = cursor.fetchone()
 
         if user:
             user_id = user[0]  # Access the user's ID using index 0
             hashed_password = user[1]  # Access the hashed password using index 1
-
+            email_confirmed=user[2]
             # Validate the password
             if sha256_crypt.verify(password, hashed_password):
                 # Password is valid, generate JWT token
                 token = generate_token(user_id)
                 close_db_connection(conn)
-                return jsonify({"message": "Login successful", "token": token,"id":user_id}), 200
+                return jsonify({"message": "Login successful", "token": token,"id":user_id,"confirm":email_confirmed}), 200
             else:
                 close_db_connection(conn)
                 return jsonify({"message": "Invalid email or password"}), 401
